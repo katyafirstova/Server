@@ -1,10 +1,13 @@
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.SocketException;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+import model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,8 +23,7 @@ public class ServerUp {
             server.configureBlocking(false);
             InetSocketAddress iAdd = new InetSocketAddress("localhost", PORT);
             server.bind(iAdd);
-
-            while(true) {
+            while (true) {
                 ByteBuffer buffer = ByteBuffer.allocate(1024);
                 SocketAddress remoteAdd = server.receive(buffer);
                 if (remoteAdd != null) {
@@ -29,13 +31,15 @@ public class ServerUp {
                     int limits = buffer.limit();
                     byte[] bytes = new byte[limits];
                     buffer.get(bytes, 0, limits);
-                    String msg = new String(bytes);
-//                    Message message = new Message(msg);
-//                    message.desirialize();
-//                    CommandCollection cmd = message.getCommand();
+                    LOG.info(buffer.toString());
+
+
+
+
+
+//                 CommandCollection cmd = message.getCommand();
 //                    Worker worker = message.getWorker();
-                    System.out.println("Client at " + remoteAdd + "  sent: " + msg);
-                    server.send(buffer, remoteAdd);
+
                 }
             }
 
@@ -50,6 +54,13 @@ public class ServerUp {
         ServerUp server = new ServerUp();
         server.run();
     }
+
+//    public void deserialize(Message message) throws IOException, ClassNotFoundException{
+//        try (ByteArrayInputStream;
+//             ObjectInputStream ois = new ObjectInputStream(fis)) {
+//            Message message1 = (Message) ois.readObject();
+//        }
+//    }
 
 }
 
