@@ -1,12 +1,11 @@
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
+import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
 
+import core.WorkerCollection;
+import model.CommandCollection;
 import model.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +15,8 @@ public class ServerUp {
     static final Logger LOG = LoggerFactory.getLogger(ServerUp.class);
     static final String LOCALHOST = "localhost";
     static final int PORT = 9023;
+
+    WorkerCollection collection = new WorkerCollection();
 
     public void run() {
         try {
@@ -32,21 +33,32 @@ public class ServerUp {
                     byte[] bytes = new byte[limits];
                     buffer.get(bytes, 0, limits);
                     LOG.info(buffer.toString());
-
-
-
-
-
-//                 CommandCollection cmd = message.getCommand();
-//                    Worker worker = message.getWorker();
-
+                    processRequest(buffer);
                 }
             }
-
-
         } catch (IOException e) {
             LOG.info(e.getLocalizedMessage());
 
+        }
+    }
+
+    private void processRequest(ByteBuffer buffer) {
+        try {
+            Message message = deserialize(buffer);
+            if (message != null) {
+                CommandCollection cmd = message.getCollection();
+                if (cmd != null) {
+                    LOG.debug(cmd.getCommand());
+                    switch (cmd) {
+                        case INSERT:
+                            collection.insert(message.getWorker());
+
+
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOG.debug(e.getLocalizedMessage());
         }
     }
 
@@ -55,13 +67,16 @@ public class ServerUp {
         server.run();
     }
 
-//    public void deserialize(Message message) throws IOException, ClassNotFoundException{
-//        try (ByteArrayInputStream;
-//             ObjectInputStream ois = new ObjectInputStream(fis)) {
-//            Message message1 = (Message) ois.readObject();
-//        }
-//    }
-
+    public Message deserialize(ByteBuffer buffer) {
+        Message message = null;
+        try (ByteArrayInputStream bis = new ByteArrayInputStream(buffer.array());
+             ObjectInputStream in = new ObjectInputStream(bis);) {
+            message = (Message) in.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            LOG.debug(e.getLocalizedMessage());
+        }
+        return message;
+    }
 }
 
 
