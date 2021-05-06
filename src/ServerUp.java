@@ -52,7 +52,24 @@ public class ServerUp {
                     switch (cmd) {
                         case INSERT:
                             collection.insert(message.getWorker());
-
+                        case SHOW:
+                            collection.show();
+                        case INFO:
+                            collection.info();
+                        case REMOVE_KEY:
+                            collection.removeKey(message.getKey());
+                        case CLEAR:
+                            collection.clear();
+                        case REMOVE_GREATER:
+                            collection.removeGreater(message.getSalary());
+                        case REMOVE_LOWER:
+                            collection.removeLower(message.getSalary());
+                        case REMOVE_ALL_BY_END_DATE:
+                            collection.removeAllByEndDate(message.getDate());
+                        case REMOVE_ALL_BY_START_DATE:
+                            collection.removeAnyByStartDate(message.getStartDate());
+                        case PRINT_FIELD_DESCENDING_END_DATE:
+                            collection.printEndDate(message.getDate());
 
                     }
                 }
