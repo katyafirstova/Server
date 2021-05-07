@@ -33,7 +33,7 @@ public class ServerUp {
                     byte[] bytes = new byte[limits];
                     buffer.get(bytes, 0, limits);
                     LOG.info(buffer.toString());
-                    processRequest(buffer);
+                    processRequest(buffer, server, remoteAdd);
                 }
             }
         } catch (IOException e) {
@@ -42,7 +42,7 @@ public class ServerUp {
         }
     }
 
-    private void processRequest(ByteBuffer buffer) {
+    private void processRequest(ByteBuffer buffer, DatagramChannel server, SocketAddress remoteAdd) {
         try {
             Message message = deserialize(buffer);
             if (message != null) {
@@ -52,24 +52,47 @@ public class ServerUp {
                     switch (cmd) {
                         case INSERT:
                             collection.insert(message.getWorker());
+                            break;
                         case SHOW:
                             collection.show();
+                            Message clientMessageShow = new Message(CommandCollection.SHOW, collection.getWorkers());
+                            server.send(serialize(clientMessageShow), remoteAdd);
+                            break;
                         case INFO:
                             collection.info();
+                            Message clientMessageInfo = new Message(
+                                    CommandCollection.INFO,
+                                    collection.getInitData(),
+                                    collection.getWorkers()
+                            );
+                            server.send(serialize(clientMessageInfo), remoteAdd);
+                            break;
                         case REMOVE_KEY:
                             collection.removeKey(message.getKey());
+                            break;
                         case CLEAR:
                             collection.clear();
+                            break;
                         case REMOVE_GREATER:
                             collection.removeGreater(message.getSalary());
+                            break;
                         case REMOVE_LOWER:
                             collection.removeLower(message.getSalary());
+                            break;
                         case REMOVE_ALL_BY_END_DATE:
                             collection.removeAllByEndDate(message.getDate());
+                            break;
                         case REMOVE_ALL_BY_START_DATE:
                             collection.removeAnyByStartDate(message.getStartDate());
+                            break;
                         case PRINT_FIELD_DESCENDING_END_DATE:
                             collection.printEndDate(message.getDate());
+                            Message clientMessageDate = new Message(
+                                    CommandCollection.PRINT_FIELD_DESCENDING_END_DATE,
+                                    collection.getWorkers()
+                                    );
+                            server.send(serialize(clientMessageDate), remoteAdd);
+                            break;
 
                     }
                 }
@@ -93,6 +116,19 @@ public class ServerUp {
             LOG.debug(e.getLocalizedMessage());
         }
         return message;
+    }
+
+
+    public ByteBuffer serialize(Message message) {
+        ByteBuffer buffer = null;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
+             ObjectOutputStream oos = new ObjectOutputStream(baos);) {
+            oos.writeObject(message);
+            buffer = ByteBuffer.wrap(baos.toByteArray());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return buffer;
     }
 }
 
