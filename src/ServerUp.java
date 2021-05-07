@@ -113,7 +113,8 @@ public class ServerUp {
              ObjectInputStream in = new ObjectInputStream(bis);) {
             message = (Message) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
-            LOG.debug(e.getLocalizedMessage());
+            LOG.debug(e.getMessage());
+            e.printStackTrace();
         }
         return message;
     }
