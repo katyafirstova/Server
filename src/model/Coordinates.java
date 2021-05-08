@@ -4,7 +4,7 @@ package model;
 import java.io.Serializable;
 
 public class Coordinates implements Serializable {
-    private float x;
+    private Float x;
     private Integer y;
 
     public Coordinates(float x, Integer y) {

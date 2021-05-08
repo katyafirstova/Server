@@ -3,7 +3,7 @@ package model;
 import java.io.Serializable;
 
 public class Person implements Serializable {
-    private float height;
+    private Float height;
     private Integer weight;
     private Color hairColor;
 

@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class Worker implements Serializable {
     private final long max = 100000;
-    private long id;
+    private Long id;
     private String name;
     private Coordinates coordinates;
     private LocalDateTime creationDate;
