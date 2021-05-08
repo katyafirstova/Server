@@ -36,6 +36,7 @@ public class Message implements Serializable {
         this.key = key;
     }
 
+
     public Message(CommandCollection collection) {
         this.collection = collection;
     }
@@ -83,6 +84,14 @@ public class Message implements Serializable {
 
     public Long getKey() {
         return key;
+    }
+
+    public HashMap<Long, Worker> getWorkers() {
+        return workers;
+    }
+
+    public LocalDateTime getInitData() {
+        return initData;
     }
 }
 

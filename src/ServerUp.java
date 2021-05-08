@@ -15,6 +15,7 @@ public class ServerUp {
     static final Logger LOG = LoggerFactory.getLogger(ServerUp.class);
     static final String LOCALHOST = "localhost";
     static final int PORT = 9023;
+    static final int PORT_2 = 43245;
 
     WorkerCollection collection = new WorkerCollection();
 
@@ -25,7 +26,7 @@ public class ServerUp {
             InetSocketAddress iAdd = new InetSocketAddress("localhost", PORT);
             server.bind(iAdd);
             while (true) {
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
+                ByteBuffer buffer = ByteBuffer.allocate(10240);
                 SocketAddress remoteAdd = server.receive(buffer);
                 if (remoteAdd != null) {
                     buffer.flip();
@@ -58,6 +59,7 @@ public class ServerUp {
                             Message clientMessageShow = new Message(CommandCollection.SHOW, collection.getWorkers());
                             server.send(serialize(clientMessageShow), remoteAdd);
                             break;
+
                         case INFO:
                             collection.info();
                             Message clientMessageInfo = new Message(
@@ -65,7 +67,7 @@ public class ServerUp {
                                     collection.getInitData(),
                                     collection.getWorkers()
                             );
-                            server.send(serialize(clientMessageInfo), remoteAdd);
+                            sendMessage(serialize(clientMessageInfo), remoteAdd);
                             break;
                         case REMOVE_KEY:
                             collection.removeKey(message.getKey());
@@ -100,6 +102,11 @@ public class ServerUp {
         } catch (Exception e) {
             LOG.debug(e.getLocalizedMessage());
         }
+    }
+
+    private void sendMessage(ByteBuffer serialize, SocketAddress remoteAdd) {
+
+
     }
 
     public static void main(String[] args) {
