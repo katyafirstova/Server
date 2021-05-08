@@ -14,27 +14,24 @@ public class ServerUp {
 
     static final Logger LOG = LoggerFactory.getLogger(ServerUp.class);
     static final String LOCALHOST = "localhost";
-    static final int PORT = 9023;
-    static final int PORT_2 = 43245;
+    static final int PORT_SERVER = 9023;
+    static final int PORT_CLIENT = 43245;
 
     WorkerCollection collection = new WorkerCollection();
 
     public void run() {
         try {
+            ByteBuffer buffer = ByteBuffer.allocate(1024*20);
             DatagramChannel server = DatagramChannel.open();
             server.configureBlocking(false);
-            InetSocketAddress iAdd = new InetSocketAddress("localhost", PORT);
+            InetSocketAddress iAdd = new InetSocketAddress(LOCALHOST, PORT_SERVER);
             server.bind(iAdd);
             while (true) {
-                ByteBuffer buffer = ByteBuffer.allocate(10240);
-                SocketAddress remoteAdd = server.receive(buffer);
-                if (remoteAdd != null) {
+                SocketAddress client = server.receive(buffer);
+                if (client != null) {
                     buffer.flip();
-                    int limits = buffer.limit();
-                    byte[] bytes = new byte[limits];
-                    buffer.get(bytes, 0, limits);
-                    LOG.info(buffer.toString());
-                    processRequest(buffer, server, remoteAdd);
+                    LOG.info("Receive buffer: " + buffer.toString());
+                    processRequest(buffer, (InetSocketAddress) client);
                 }
             }
         } catch (IOException e) {
@@ -43,7 +40,7 @@ public class ServerUp {
         }
     }
 
-    private void processRequest(ByteBuffer buffer, DatagramChannel server, SocketAddress remoteAdd) {
+    private void processRequest(ByteBuffer buffer, InetSocketAddress client) {
         try {
             Message message = deserialize(buffer);
             if (message != null) {
@@ -57,7 +54,7 @@ public class ServerUp {
                         case SHOW:
                             collection.show();
                             Message clientMessageShow = new Message(CommandCollection.SHOW, collection.getWorkers());
-                            server.send(serialize(clientMessageShow), remoteAdd);
+                            sendMessage(serialize(clientMessageShow), client);
                             break;
 
                         case INFO:
@@ -67,7 +64,7 @@ public class ServerUp {
                                     collection.getInitData(),
                                     collection.getWorkers()
                             );
-                            sendMessage(serialize(clientMessageInfo), remoteAdd);
+                            sendMessage(serialize(clientMessageInfo), client);
                             break;
                         case REMOVE_KEY:
                             collection.removeKey(message.getKey());
@@ -92,8 +89,8 @@ public class ServerUp {
                             Message clientMessageDate = new Message(
                                     CommandCollection.PRINT_FIELD_DESCENDING_END_DATE,
                                     collection.getWorkers()
-                                    );
-                            server.send(serialize(clientMessageDate), remoteAdd);
+                            );
+                            sendMessage(serialize(clientMessageDate), client);
                             break;
 
                     }
@@ -104,9 +101,16 @@ public class ServerUp {
         }
     }
 
-    private void sendMessage(ByteBuffer serialize, SocketAddress remoteAdd) {
-
-
+    private void sendMessage(ByteBuffer buffer, InetSocketAddress clientAddr) throws IOException {
+        String clientHost = clientAddr.getHostName();
+        if (buffer != null) {
+            DatagramChannel client = null;
+            client = DatagramChannel.open();
+            client.bind(null);
+            InetSocketAddress serverAddress = new InetSocketAddress(clientHost, PORT_CLIENT);
+            client.send(buffer, serverAddress);
+            client.close();
+        }
     }
 
     public static void main(String[] args) {
@@ -139,5 +143,4 @@ public class ServerUp {
         return buffer;
     }
 }
-
 
