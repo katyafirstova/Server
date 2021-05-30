@@ -1,107 +1,159 @@
 drop table if exists color;
 
-create sequence id
-start 1
-increment 2
-minvalue 1;
+drop sequence if exists color_id_seq;
 
-select  nextval('id');
+create sequence color_id_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
 
-create table color(id int, name text)
+create table color(
+    id integer default nextval('color_id_seq') not null primary key,
+    name text
+);
 
-insert into color(id, name) values(nextval('id'), 'BROWN');
+insert into color(name) values('brown');
 
 select * from color;
 
-insert into color(id, name) values(nextval('id'),'BLACK');
+insert into color(name) values('black');
 
-select * from color
+select * from color;
 
-insert into color(id, name) values(nextval('id'), 'WHITE');
+insert into color(name) values('white');
 
-select * from color
+select * from color;
 
 drop table if exists coordinates;
 
-select nextval('id');
+drop sequence if exists coordinates_id_seq;
 
-create table coordinates(id int, x int, y int check (y <= 92));
+create sequence coordinates_id_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
+
+create table coordinates(id integer default nextval('coordinates_id_seq') not null primary key,
+    x int,
+    y int check (y <= 92));
 
 select * from coordinates;
 
-insert into coordinates(id, name, number) values(nextval('id'), 'x', 3);
-
-select * from coordinates;
-
-insert into coordinates(id, name, number) values(nextval('id'), 'y', 8);
+insert into coordinates(x, y) values(2,5);
 
 select * from coordinates;
 
 drop table if exists status;
 
-select nextval('id');
+drop sequence if exists status_id_seq;
 
-create table status(id int, name text);
+create sequence status_id_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
 
-select * from status;
-
-insert into status(id, name) values(nextval('id'), 'HIRED');
-
-select * from status;
-
-insert into status(id, name) values(nextval('id'), 'FIRED');
-
-select * from status;
-
-insert into status(id, name) values(nextval('id'), 'RECOMMENDED FOR PROMOTION');
+create table status (id integer default nextval('status_id_seq') not null primary key,
+    name text);
 
 select * from status;
 
-insert into status(id, name) values(nextval('id'), 'REGULAR');
+insert into status(name) values('hired');
 
 select * from status;
 
-insert into status(id, name) values(nextval('id'), 'PROBATION');
+insert into status(name) values('fired');
+
+select * from status;
+
+insert into status(name) values('recommended for promotion');
+
+select * from status;
+
+insert into status(name) values('regular');
+
+select * from status;
+
+insert into status(name) values('probation');
 
 select * from status;
 
 drop table if exists person;
 
-select nextval('id');
+drop sequence if exists person_id_seq;
 
-create table person (id int, height int check(height > 0), weight int check (weight > 0));
+create sequence person_id_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
+
+create table person (id integer default nextval('person_id_seq') not null primary key,
+    height int check(height > 0),
+    weight int check (weight > 0),
+    color_id int references color
+    );
 
 select * from person;
 
-insert into person(id, height) values (nextval('id'), 23);
-
-select * from person;
-
-insert into person(id, weight) values (nextval('id'), 232);
+insert into person(height, weight, color_id) values (23, 32, 1);
 
 select * from person;
 
 drop table if exists worker;
 
-select nextval('id');
+drop sequence if exists worker_id_seq;
 
-create table worker(id int, name text, creationDate date, salary int check(salary >= 0)
-, startDate date check(startDate = null), endDate date);
+create sequence worker_id_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
+
+create table worker(id integer default nextval('worker_id_seq') not null primary key,
+    name text,
+    creationdate date,
+    salary int check(salary >= 0),
+    startdate date check(startdate = null),
+    enddate date,
+    coordinates_id int references coordinates,
+    status_id int references status,
+    person_id int references person
+    );
 
 select * from worker;
 
 select current_date;
 
-insert into worker(id, name, creationDate, salary, startDate, endDate) values (nextval('id'), 'frfrfrefr', current_date,
-5434,'2002-03-04', '2002-03-04 00:02:03');
+insert into worker(name, creationdate, salary, startdate, enddate, coordinates_id, status_id, person_id)
+    values ('frfrfrefr',
+    current_date,
+    5434,
+    '2002-03-04',
+    '2002-03-04 00:02:03',
+    1,
+    1,
+    1);
 
 select * from worker;
 
-drop table if exists user;
+drop table if exists user_worker;
 
-select nextval('id');
+drop sequence if exists user_worker_id_seq;
 
-create table user(id int, username text, userpassword text, creationDate timestamp, updateDate timestamp)
+create sequence user_worker_id_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
+
+create table user_worker(id integer default nextval('user_worker_id_seq') not null primary key,
+    username text,
+    userpassword text,
+    creationdate timestamp,
+    updatedate timestamp);
 
 
 
