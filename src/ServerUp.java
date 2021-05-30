@@ -21,12 +21,13 @@ public class ServerUp {
 
     public void run() {
         try {
-            ByteBuffer buffer = ByteBuffer.allocate(1024*20);
+            ByteBuffer buffer = ByteBuffer.allocate(1024 * 20);
             DatagramChannel server = DatagramChannel.open();
-            server.configureBlocking(false);
+            server.configureBlocking(true);
             InetSocketAddress iAdd = new InetSocketAddress(LOCALHOST, PORT_SERVER);
             server.bind(iAdd);
             while (true) {
+                buffer.clear();
                 SocketAddress client = server.receive(buffer);
                 if (client != null) {
                     buffer.flip();
@@ -51,6 +52,7 @@ public class ServerUp {
                         case INSERT:
                             collection.insert(message.getWorker());
                             break;
+
                         case SHOW:
                             collection.show();
                             Message clientMessageShow = new Message(CommandCollection.SHOW, collection.getWorkers());
@@ -66,24 +68,31 @@ public class ServerUp {
                             );
                             sendMessage(serialize(clientMessageInfo), client);
                             break;
+
                         case REMOVE_KEY:
                             collection.removeKey(message.getKey());
                             break;
+
                         case CLEAR:
                             collection.clear();
                             break;
+
                         case REMOVE_GREATER:
                             collection.removeGreater(message.getSalary());
                             break;
+
                         case REMOVE_LOWER:
                             collection.removeLower(message.getSalary());
                             break;
+
                         case REMOVE_ALL_BY_END_DATE:
                             collection.removeAllByEndDate(message.getDate());
                             break;
+
                         case REMOVE_ALL_BY_START_DATE:
                             collection.removeAnyByStartDate(message.getStartDate());
                             break;
+
                         case PRINT_FIELD_DESCENDING_END_DATE:
                             collection.printEndDate(message.getDate());
                             Message clientMessageDate = new Message(
@@ -129,7 +138,6 @@ public class ServerUp {
         }
         return message;
     }
-
 
     public ByteBuffer serialize(Message message) {
         ByteBuffer buffer = null;
