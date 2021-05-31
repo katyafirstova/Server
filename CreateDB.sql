@@ -1,4 +1,8 @@
-drop table if exists color;
+-- set schema 'public';
+
+-- select * from tables;
+
+drop table if exists color cascade;
 
 drop sequence if exists color_id_seq;
 
@@ -25,7 +29,7 @@ insert into color(name) values('white');
 
 select * from color;
 
-drop table if exists coordinates;
+drop table if exists coordinates cascade;
 
 drop sequence if exists coordinates_id_seq;
 
@@ -36,16 +40,16 @@ create sequence coordinates_id_seq
     cache 1;
 
 create table coordinates(id integer default nextval('coordinates_id_seq') not null primary key,
-    x int,
+    x numeric,
     y int check (y <= 92));
 
 select * from coordinates;
 
-insert into coordinates(x, y) values(2,5);
+insert into coordinates(x, y) values(2.2,5);
 
 select * from coordinates;
 
-drop table if exists status;
+drop table if exists status cascade;
 
 drop sequence if exists status_id_seq;
 
@@ -80,7 +84,7 @@ insert into status(name) values('probation');
 
 select * from status;
 
-drop table if exists person;
+drop table if exists person cascade;
 
 drop sequence if exists person_id_seq;
 
@@ -91,18 +95,18 @@ create sequence person_id_seq
     cache 1;
 
 create table person (id integer default nextval('person_id_seq') not null primary key,
-    height int check(height > 0),
+    height numeric  check(height > 0.0),
     weight int check (weight > 0),
     color_id int references color
     );
 
 select * from person;
 
-insert into person(height, weight, color_id) values (23, 32, 1);
+insert into person(height, weight, color_id) values (23.0, 32, 1);
 
 select * from person;
 
-drop table if exists worker;
+drop table if exists worker cascade;
 
 drop sequence if exists worker_id_seq;
 
@@ -114,7 +118,7 @@ create sequence worker_id_seq
 
 create table worker(id integer default nextval('worker_id_seq') not null primary key,
     name text,
-    creationdate date,
+    creationdate timestamp not null default current_timestamp,
     salary int check(salary >= 0),
     startdate date check(startdate = null),
     enddate date,
@@ -139,17 +143,17 @@ insert into worker(name, creationdate, salary, startdate, enddate, coordinates_i
 
 select * from worker;
 
-drop table if exists user_worker;
+drop table if exists user_worker cascade;
 
-drop sequence if exists user_worker_id_seq;
+drop sequence if exists user_worker_seq;
 
-create sequence user_worker_id_seq
+create sequence user_worker_seq
     increment by 1
     no maxvalue
     no minvalue
     cache 1;
 
-create table user_worker(id integer default nextval('user_worker_id_seq') not null primary key,
+create table user_worker(id integer default nextval('user_worker_seq') not null primary key,
     username text,
     userpassword text,
     creationdate timestamp,

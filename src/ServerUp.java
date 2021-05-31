@@ -54,13 +54,11 @@ public class ServerUp {
                             break;
 
                         case SHOW:
-                            collection.show();
                             Message clientMessageShow = new Message(CommandCollection.SHOW, collection.getWorkers());
                             sendMessage(serialize(clientMessageShow), client);
                             break;
 
                         case INFO:
-                            collection.info();
                             Message clientMessageInfo = new Message(
                                     CommandCollection.INFO,
                                     collection.getInitData(),
@@ -94,7 +92,6 @@ public class ServerUp {
                             break;
 
                         case PRINT_FIELD_DESCENDING_END_DATE:
-                            collection.printEndDate(message.getDate());
                             Message clientMessageDate = new Message(
                                     CommandCollection.PRINT_FIELD_DESCENDING_END_DATE,
                                     collection.getWorkers()
