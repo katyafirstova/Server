@@ -35,8 +35,9 @@ public class WorkerCollection implements InterfaceWorkerCollection {
     @Override
     public void insert(Worker worker) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
-        dbUtils.insertWorker(worker);
-        workers.put(worker.getId(), worker);
+        if (dbUtils.insertWorker(worker)) {
+            workers.put(worker.getId(), worker);
+        }
     }
 
     /**

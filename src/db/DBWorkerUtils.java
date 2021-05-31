@@ -101,7 +101,7 @@ public class DBWorkerUtils {
     }
 
 
-    public void insertWorker(String name, int coordinates_id, int salary,
+    public boolean insertWorker(String name, int coordinates_id, int salary,
                              LocalDate startDate, Date endDate, Status status, int person_id) {
         LOG.debug(String.format("insertWorker"));
         Connection connection = getDBConnection();
@@ -121,8 +121,10 @@ public class DBWorkerUtils {
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
+            return false;
         } catch (Exception e) {
             LOG.debug(e.getMessage());
+            return false;
         } finally {
             try {
                 if (connection != null) {
@@ -135,14 +137,15 @@ public class DBWorkerUtils {
                 LOG.debug(exception.getMessage());
             }
         }
+        return true;
     }
 
-    public void insertWorker(Worker worker) {
+    public boolean insertWorker(Worker worker) {
         Coordinates coordinates = worker.getCoordinates();
         Person person = worker.getPerson();
         int coordinates_id = insertCoordinates(coordinates.getX(), coordinates.getY());
         int person_id = insertPerson(person.getHeight(), person.getWeight(), person.getHairColor());
-        insertWorker(worker.getName(), coordinates_id, worker.getSalary(), worker.getStartDate(), worker.getEndDate(),
+        return insertWorker(worker.getName(), coordinates_id, worker.getSalary(), worker.getStartDate(), worker.getEndDate(),
                 worker.getStatus(), person_id);
     }
 
