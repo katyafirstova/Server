@@ -24,7 +24,6 @@ public class DBWorkerUtils {
         try {
             Class.forName("org.postgresql.Driver");
             connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            connection.setAutoCommit(true);
             LOG.info("Соединение установлено");
         } catch (ClassNotFoundException e) {
             LOG.debug("Драйвер не найден");
@@ -205,15 +204,45 @@ public class DBWorkerUtils {
         return id;
     }
 
+    public Integer getWorkerId(Worker worker) {
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        Integer id = null;
+        try {
+            String sql = "select id from worker where name = ?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, worker.getName().toLowerCase(Locale.ROOT));
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            id = rs.getInt("id");
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+        }
+        return id;
+    }
+
     public boolean deleteWorkerById(long id) {
         LOG.debug(String.format("deleteWorkerById"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         Worker worker = new Worker();
         try {
+            connection.setAutoCommit(false);
             String sql = "delete from worker where id = ?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, worker.getId());
+            id = getWorkerId(worker);
+            preparedStatement.setLong(1, id);
             preparedStatement.execute();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
@@ -233,6 +262,7 @@ public class DBWorkerUtils {
         }
         return true;
     }
+
 
     public boolean deleteWorker() {
         LOG.debug(String.format("deleteWorker"));

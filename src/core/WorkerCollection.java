@@ -46,10 +46,10 @@ public class WorkerCollection implements InterfaceWorkerCollection {
     @Override
     public void removeKey(long id) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
-        if (dbUtils.deleteWorkerById(id)) {
+        if (dbUtils.deleteWorkerById(id))
             workers.remove(id);
         }
-    }
+
 
     /**
      * очистка коллекции
@@ -61,7 +61,6 @@ public class WorkerCollection implements InterfaceWorkerCollection {
             workers.clear();
         }
     }
-
 
     /**
      * удаляет все элементы коллекции, значение поля salary которых больше заданного
