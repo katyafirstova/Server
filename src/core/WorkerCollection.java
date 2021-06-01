@@ -45,7 +45,10 @@ public class WorkerCollection implements InterfaceWorkerCollection {
     */
     @Override
     public void removeKey(long id) {
-        workers.remove(id);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
+        if (dbUtils.deleteWorkerById(id)) {
+            workers.remove(id);
+        }
     }
 
     /**
@@ -53,7 +56,10 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void clear() {
-        workers.clear();
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
+        if (dbUtils.deleteWorker()) {
+            workers.clear();
+        }
     }
 
 
@@ -62,13 +68,16 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void removeGreater(int salary) {
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
             Map.Entry<Long, Worker> entry = workerIterator.next();
             Worker w = entry.getValue();
             int curSalary = w.getSalary();
             if (curSalary > salary) {
-                workerIterator.remove();
+                if (dbUtils.deleteWorkerBySalary(salary)) {
+                    workerIterator.remove();
+                }
             }
         }
     }

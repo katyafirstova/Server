@@ -102,7 +102,7 @@ public class DBWorkerUtils {
 
 
     public boolean insertWorker(String name, int coordinates_id, int salary,
-                             LocalDate startDate, Date endDate, Status status, int person_id) {
+                                LocalDate startDate, Date endDate, Status status, int person_id) {
         LOG.debug(String.format("insertWorker"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
@@ -203,6 +203,90 @@ public class DBWorkerUtils {
             }
         }
         return id;
+    }
+
+    public boolean deleteWorkerById(long id) {
+        LOG.debug(String.format("deleteWorkerById"));
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        Worker worker = new Worker();
+        try {
+            String sql = "delete from worker where id = ?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, worker.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+
+        }
+        return true;
+    }
+
+    public boolean deleteWorker() {
+        LOG.debug(String.format("deleteWorker"));
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            String sql = "truncate worker";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+
+        }
+        return true;
+    }
+
+    public boolean deleteWorkerBySalary(int salary) {
+        LOG.debug(String.format("deleteWorkerBySalary"));
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            String sql = "delete from worker where salary >= ?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, salary);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+
+        }
+        return true;
     }
 }
 
