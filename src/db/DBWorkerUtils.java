@@ -1,6 +1,7 @@
 package db;
 
 import java.sql.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -12,26 +13,9 @@ import org.slf4j.*;
 /**
  * {@code DBWorkerUtils} database utilities
  */
-public class DBWorkerUtils {
+public class DBWorkerUtils extends DBConnection {
 
     static final Logger LOG = LoggerFactory.getLogger(DBWorkerUtils.class);
-    private static final String DB_USER = "pg";
-    private static final String DB_PASSWORD = "pg";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/postgres";
-
-    private Connection getDBConnection() {
-        Connection connection = null;
-        try {
-            Class.forName("org.postgresql.Driver");
-            connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-            LOG.info("Соединение установлено");
-        } catch (ClassNotFoundException e) {
-            LOG.debug("Драйвер не найден");
-        } catch (SQLException e) {
-            LOG.debug(String.format("Ошибка при подключении к базе данных: %s", e.getMessage()));
-        }
-        return connection;
-    }
 
     public int insertCoordinates(float x, int y) {
         LOG.debug(String.format("insertCoordinates: x=%f, y=%d", x, y));
@@ -100,30 +84,37 @@ public class DBWorkerUtils {
     }
 
 
-    public boolean insertWorker(String name, int coordinates_id, int salary,
-                                LocalDate startDate, Date endDate, Status status, int person_id) {
+    public long insertWorker(long worker_id, String name, int coordinates_id, int salary,
+                                LocalDate startDate, Date endDate, Status status, int person_id, long user_id) {
         LOG.debug(String.format("insertWorker"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
+        long primkey = -1;
         try {
-            String sql = "insert into worker (name, coordinates_id, salary, startDate, endDate, status_id, person_id)" +
-                    " values (?, ?, ?, ?, ?, ?, ?)";
+            String sql = "insert into worker (worker_id, name, coordinates_id, salary, startDate, endDate," +
+                    " status_id, person_id, user_id) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, name);
-            preparedStatement.setInt(2, coordinates_id);
-            preparedStatement.setInt(3, salary);
-            preparedStatement.setDate(4, java.sql.Date.valueOf(startDate.toString()));
+            preparedStatement.setLong(1, worker_id);
+            preparedStatement.setString(2, name);
+            preparedStatement.setInt(3, coordinates_id);
+            preparedStatement.setInt(4, salary);
+            preparedStatement.setDate(5, java.sql.Date.valueOf(startDate.toString()));
             LocalDate localEndDate = endDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-            preparedStatement.setDate(5, java.sql.Date.valueOf(localEndDate.toString()));
-            preparedStatement.setInt(6, getStatusId(status));
-            preparedStatement.setInt(7, person_id);
+            preparedStatement.setDate(6, java.sql.Date.valueOf(localEndDate.toString()));
+            preparedStatement.setInt(7, getStatusId(status));
+            preparedStatement.setInt(8, person_id);
+            preparedStatement.setLong(9, user_id);
             preparedStatement.executeUpdate();
+            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                primkey = generatedKeys.getInt(1);
+            }
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
-            return false;
+            return -1;
         } catch (Exception e) {
             LOG.debug(e.getMessage());
-            return false;
+            return -1;
         } finally {
             try {
                 if (connection != null) {
@@ -136,16 +127,16 @@ public class DBWorkerUtils {
                 LOG.debug(exception.getMessage());
             }
         }
-        return true;
+        return primkey;
     }
 
-    public boolean insertWorker(Worker worker) {
+    public long insertWorker(Worker worker) {
         Coordinates coordinates = worker.getCoordinates();
         Person person = worker.getPerson();
         int coordinates_id = insertCoordinates(coordinates.getX(), coordinates.getY());
         int person_id = insertPerson(person.getHeight(), person.getWeight(), person.getHairColor());
-        return insertWorker(worker.getName(), coordinates_id, worker.getSalary(), worker.getStartDate(), worker.getEndDate(),
-                worker.getStatus(), person_id);
+        return insertWorker(worker.getId(), worker.getName(), coordinates_id, worker.getSalary(), worker.getStartDate(),
+                worker.getEndDate(), worker.getStatus(), person_id, worker.getUserId());
     }
 
     public Integer getColorId(Color color) {
@@ -238,12 +229,11 @@ public class DBWorkerUtils {
         PreparedStatement preparedStatement = null;
         Worker worker = new Worker();
         try {
-            connection.setAutoCommit(false);
-            String sql = "delete from worker where id = ?";
+            String sql = "delete from worker where worker_id = ?";
             preparedStatement = connection.prepareStatement(sql);
-            id = getWorkerId(worker);
             preparedStatement.setLong(1, id);
-            preparedStatement.execute();
+            int result = preparedStatement.executeUpdate();
+            LOG.debug(String.format("Deleted row, id = %d, res = %d ", id, result));
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
             return false;
@@ -291,8 +281,8 @@ public class DBWorkerUtils {
         return true;
     }
 
-    public boolean deleteWorkerBySalary(int salary) {
-        LOG.debug(String.format("deleteWorkerBySalary"));
+    public boolean deleteWorkerByGreaterSalary(int salary) {
+        LOG.debug(String.format("deleteWorkerByGreaterSalary"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
@@ -314,6 +304,95 @@ public class DBWorkerUtils {
             } catch (SQLException exception) {
                 LOG.debug(exception.getMessage());
             }
+
+        }
+        return true;
+    }
+
+    public boolean deleteWorkerByLowerSalary(int salary) {
+        LOG.debug(String.format("deleteWorkerByLowerSalary"));
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            String sql = "delete from worker where salary <= ?";
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setInt(1, salary);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+
+        }
+        return true;
+    }
+
+    public boolean deleteWorkerByEndDate(Date endDate) {
+        LOG.debug(String.format("deleteWorkerByEndDate"));
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            String sql = "delete from worker where enddate = ?";
+            preparedStatement = connection.prepareStatement(sql);
+            java.sql.Date sqlEndDate = new java.sql.Date(endDate.getTime());
+            preparedStatement.setDate(1, sqlEndDate);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+
+        }
+        return true;
+
+
+    }
+
+    public boolean deleteWorkerByStartDate(LocalDate startDate) {
+        LOG.debug(String.format("deleteWorkerByStartDate"));
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        try {
+            String sql = "delete from worker where startdate = ?";
+            preparedStatement = connection.prepareStatement(sql);
+            Instant instant = Instant.from(startDate.atStartOfDay(ZoneId.of("GMT")));
+            Date newStartDate = Date.from(instant);
+            java.sql.Date sqlStartDate = new java.sql.Date(newStartDate.getTime());
+            preparedStatement.setDate(1, sqlStartDate);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+            return false;
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage()); }
 
         }
         return true;

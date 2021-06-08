@@ -1,5 +1,7 @@
 package model;
 
+import db.UserUtils;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,9 +19,11 @@ public class Worker implements Serializable {
     private Date endDate;
     private Status status;
     private Person person;
+    private User user;
+
 
     public Worker(String name, Coordinates coordinates, Integer salary,
-                  LocalDate startDate, Date endDate, Status status, Person person) {
+                  LocalDate startDate, Date endDate, Status status, Person person, User user) {
         this.id = (long) (Math.random()*max);
         this.name = name;
         this.coordinates = coordinates;
@@ -29,6 +33,7 @@ public class Worker implements Serializable {
         this.endDate = endDate;
         this.status = status;
         this.person = person;
+        this.user = user;
     }
 
     public Worker() {
@@ -130,5 +135,8 @@ public class Worker implements Serializable {
         this.person = person;
     }
 
+    public long getUserId() {
+        return this.user.getUserId();
+    }
 
 }

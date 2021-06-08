@@ -2,6 +2,24 @@
 
 -- select * from tables;
 
+drop table if exists user_worker cascade;
+
+drop sequence if exists user_seq;
+
+create sequence user_seq
+    increment by 1
+    no maxvalue
+    no minvalue
+    cache 1;
+
+create table user_worker(id integer default nextval('user_seq') not null primary key,
+    username text,
+    userpassword text,
+    creationdate timestamp not null default current_timestamp,
+    updatedate timestamp);
+
+select * from user_worker;
+
 drop table if exists color cascade;
 
 drop sequence if exists color_id_seq;
@@ -13,7 +31,7 @@ create sequence color_id_seq
     cache 1;
 
 create table color(
-    id integer default nextval('color_id_seq') not null primary key,
+    id integer default nextval('color_id_seq') not null primary  key,
     name text
 );
 
@@ -117,6 +135,7 @@ create sequence worker_id_seq
     cache 1;
 
 create table worker(id integer default nextval('worker_id_seq') not null primary key,
+    worker_id int,
     name text,
     creationdate timestamp not null default current_timestamp,
     salary int check(salary >= 0),
@@ -124,7 +143,8 @@ create table worker(id integer default nextval('worker_id_seq') not null primary
     enddate date,
     coordinates_id int references coordinates,
     status_id int references status,
-    person_id int references person
+    person_id int references person,
+    user_id int references user_worker
     );
 
 select * from worker;
@@ -141,23 +161,9 @@ insert into worker(name, creationdate, salary, startdate, enddate, coordinates_i
     1,
     1);
 
+delete from worker where worker_id = 89991;
+
 select * from worker;
-
-drop table if exists user_worker cascade;
-
-drop sequence if exists user_worker_seq;
-
-create sequence user_worker_seq
-    increment by 1
-    no maxvalue
-    no minvalue
-    cache 1;
-
-create table user_worker(id integer default nextval('user_worker_seq') not null primary key,
-    username text,
-    userpassword text,
-    creationdate timestamp,
-    updatedate timestamp);
 
 
 
