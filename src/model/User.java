@@ -1,6 +1,13 @@
 package model;
 
-public class User {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+
+public class User extends Hasher implements Serializable {
+    static final Logger LOG = LoggerFactory.getLogger(User.class);
     private String userName;
     private String userPassword;
     private long userId;
@@ -32,5 +39,16 @@ public class User {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public static User createUser(String userName, String userPassword) {
+        User user = new User(userName, userPassword);
+        try {
+            Hasher hasher = new Hasher();
+            hasher.getSecurePassword(userPassword, hasher.getSalt());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.debug(e.getLocalizedMessage());
+        }
+        return user;
     }
 }

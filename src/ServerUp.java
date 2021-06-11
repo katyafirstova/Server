@@ -22,11 +22,13 @@ public class ServerUp {
     WorkerCollection collection = new WorkerCollection();
 
     public ServerUp(String serverAddr) {
-        this.serverAddr = LOCALHOST;
+        this.serverAddr = serverAddr;
     }
 
     public ServerUp() {
+        this.serverAddr = LOCALHOST;
     }
+
 
     public void run() {
         try {
@@ -47,9 +49,10 @@ public class ServerUp {
         } catch (IOException e) {
             LOG.info(e.getLocalizedMessage());
 
+        } catch (Exception e) {
+            LOG.info(e.getLocalizedMessage());
         }
     }
-
     private void processRequest(ByteBuffer buffer, InetSocketAddress client) {
         try {
             Message message = deserialize(buffer);
@@ -129,7 +132,7 @@ public class ServerUp {
     }
 
     public static void main(String[] args) {
-        ServerUp server = new ServerUp(serverAddr);
+        ServerUp server = new ServerUp();
         server.run();
     }
 

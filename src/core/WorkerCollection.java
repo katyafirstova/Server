@@ -14,6 +14,7 @@ import java.io.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.*;
 
 import db.DBWorkerUtils;
 import org.slf4j.*;
@@ -25,9 +26,8 @@ import org.slf4j.*;
 public class WorkerCollection implements InterfaceWorkerCollection {
 
     static final Logger LOG = LoggerFactory.getLogger(WorkerCollection.class);
-    private HashMap<Long, Worker> workers = new HashMap<Long, Worker>();
+    private  ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<Long, Worker>();
     private LocalDateTime initData;
-    private DBUserUtils current_user = new DBUserUtils();
 
 
     public WorkerCollection() {
@@ -39,7 +39,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void insert(Worker worker) {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         long id = dbUtils.insertWorker(worker);
         if (id > 0) {
             workers.put(worker.getId(), worker);
@@ -51,7 +51,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void removeKey(long id) {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         if(dbUtils.deleteWorkerById(id)) {
             workers.remove(id);
         }
@@ -63,7 +63,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void clear() {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         if (dbUtils.deleteWorker()) {
             workers.clear();
         }
@@ -74,7 +74,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void removeGreater(int salary) {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
             Map.Entry<Long, Worker> entry = workerIterator.next();
@@ -94,7 +94,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void removeLower(int salary) {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
             Map.Entry<Long, Worker> entry = workerIterator.next();
@@ -113,7 +113,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void removeAllByEndDate(Date endDate) {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         if (endDate == null)
             throw new IllegalArgumentException("Поле endDate не может быть пустым!");
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
@@ -136,7 +136,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
      */
     @Override
     public void removeAnyByStartDate(LocalDate startDate) {
-        DBWorkerUtils dbUtils = new DBWorkerUtils(current_user);
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
             Map.Entry<Long, Worker> entry = workerIterator.next();

@@ -1,6 +1,5 @@
 package model;
 
-import db.DBUserUtils;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -41,6 +40,11 @@ public class Worker implements Serializable {
         this.creationDate = LocalDateTime.now();
 
     }
+
+    public Worker(String name, Coordinates coordinates, Integer salary, LocalDate startDate,
+                  Date endDate, Status status, Person person) {
+    }
+
 
     @Override
     public String toString() {
