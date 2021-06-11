@@ -20,6 +20,8 @@ create table user_worker(id integer default nextval('user_seq') not null primary
 
 select * from user_worker;
 
+select id, username, userpassword from user_worker;
+
 drop table if exists color cascade;
 
 drop sequence if exists color_id_seq;
