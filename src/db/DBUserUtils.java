@@ -5,9 +5,9 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.*;
 
-public class UserUtils extends DBConnection {
+public class DBUserUtils extends DBConnection {
 
-    static final Logger LOG = LoggerFactory.getLogger(UserUtils.class);
+    static final Logger LOG = LoggerFactory.getLogger(DBUserUtils.class);
 
     public boolean insertUser(String userName, String userPassword) {
         LOG.debug(String.format("insertUser"));

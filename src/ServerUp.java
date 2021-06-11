@@ -16,8 +16,17 @@ public class ServerUp {
     static final String LOCALHOST = "localhost";
     static final int PORT_SERVER = 9023;
     static final int PORT_CLIENT = 43245;
+    private final String serverAddr;
+
 
     WorkerCollection collection = new WorkerCollection();
+
+    public ServerUp(String serverAddr) {
+        this.serverAddr = LOCALHOST;
+    }
+
+    public ServerUp() {
+    }
 
     public void run() {
         try {
@@ -120,7 +129,7 @@ public class ServerUp {
     }
 
     public static void main(String[] args) {
-        ServerUp server = new ServerUp();
+        ServerUp server = new ServerUp(serverAddr);
         server.run();
     }
 
@@ -146,6 +155,17 @@ public class ServerUp {
             e.printStackTrace();
         }
         return buffer;
+    }
+
+    public ByteBuffer receiveMessage() throws IOException {
+        DatagramChannel server = DatagramChannel.open();
+        server.configureBlocking(true);
+        InetSocketAddress iAdd = new InetSocketAddress(this.serverAddr, PORT_CLIENT);
+        server.bind(iAdd);
+        ByteBuffer in = ByteBuffer.allocate(81920);
+        server.receive(in);
+        server.close();
+        return in;
     }
 }
 

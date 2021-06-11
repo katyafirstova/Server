@@ -3,11 +3,12 @@ package core;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 import core.interfaces.InterfaceWorkerCollection;
-import db.UserUtils;
+import db.DBUserUtils;
 import model.Color;
 import model.Message;
 import model.Status;
 import model.Worker;
+
 
 import java.io.*;
 import java.time.LocalDate;
@@ -26,7 +27,7 @@ public class WorkerCollection implements InterfaceWorkerCollection {
     static final Logger LOG = LoggerFactory.getLogger(WorkerCollection.class);
     private HashMap<Long, Worker> workers = new HashMap<Long, Worker>();
     private LocalDateTime initData;
-    private UserUtils current_user = new UserUtils();
+    private DBUserUtils current_user = new DBUserUtils();
 
 
     public WorkerCollection() {
