@@ -35,6 +35,10 @@ public class Worker implements Serializable {
         this.user = user;
     }
 
+    public Worker(User user) {
+        this.user = user;
+    }
+
     public Worker() {
         this.id = (long) (Math.random()*max);
         this.creationDate = LocalDateTime.now();

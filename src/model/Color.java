@@ -1,6 +1,7 @@
 package model;
 
 import java.io.Serializable;
+import java.util.Locale;
 
 
 public enum Color implements Serializable {
@@ -20,7 +21,7 @@ public enum Color implements Serializable {
 
     public static Color fromStr(String cmd) {
         for (Color s : Color.values()) {
-            if (cmd != null && cmd.equals(s.name())) {
+            if (cmd != null && cmd.toLowerCase(Locale.ROOT).equals(s.name())) {
                 return s;
             }
         }

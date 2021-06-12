@@ -11,7 +11,7 @@ public class DBConnection {
     static final Logger LOG = LoggerFactory.getLogger(DBConnection.class);
     private static final String DB_USER = "s309544";
     private static final String DB_PASSWORD = "jvd076";
-    private static final String DB_URL = "jdbc:postgresql://localhost:5430/studs";
+    private static final String DB_URL = "jdbc:postgresql://db:5432/studs";
 
     protected Connection getDBConnection() {
         Connection connection = null;

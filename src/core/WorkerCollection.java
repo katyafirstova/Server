@@ -50,9 +50,9 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
      * удаляет элемента из коллекции по ключу
      */
     @Override
-    public void removeKey(long id) {
+    public void removeKey(long id, long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
-        if(dbUtils.deleteWorkerById(id)) {
+        if(dbUtils.deleteWorkerById(id, currentUserId)) {
             workers.remove(id);
         }
     }
@@ -62,9 +62,9 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
      * очистка коллекции
      */
     @Override
-    public void clear() {
+    public void clear(long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
-        if (dbUtils.deleteWorker()) {
+        if (dbUtils.deleteWorker(currentUserId)) {
             workers.clear();
         }
     }
@@ -73,7 +73,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
      * удаляет все элементы коллекции, значение поля salary которых больше заданного
      */
     @Override
-    public void removeGreater(int salary) {
+    public void removeGreater(int salary, long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
@@ -81,7 +81,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Worker w = entry.getValue();
             int curSalary = w.getSalary();
             if (curSalary > salary) {
-                if (dbUtils.deleteWorkerByGreaterSalary(salary)) {
+                if (dbUtils.deleteWorkerByGreaterSalary(salary, currentUserId)) {
                     workerIterator.remove();
                 }
             }
@@ -93,7 +93,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
      * удаляет все элементы коллекции, значение поля salary которых меньше заданного
      */
     @Override
-    public void removeLower(int salary) {
+    public void removeLower(int salary, long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
@@ -101,7 +101,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Worker w = entry.getValue();
             int curSalary = w.getSalary();
             if (curSalary < salary) {
-                if (dbUtils.deleteWorkerByLowerSalary(salary)) {
+                if (dbUtils.deleteWorkerByLowerSalary(salary, currentUserId)) {
                     workerIterator.remove();
                 }
             }
@@ -112,7 +112,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
      * удаляет все элементы коллекции, значение поля endDate которых равно заданному
      */
     @Override
-    public void removeAllByEndDate(Date endDate) {
+    public void removeAllByEndDate(Date endDate, long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         if (endDate == null)
             throw new IllegalArgumentException("Поле endDate не может быть пустым!");
@@ -123,7 +123,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Date curEndDate = w.getEndDate();
             final long difference = curEndDate.getTime() - endDate.getTime();
             if (difference > -1000 && difference < 1000) {
-                if (dbUtils.deleteWorkerByEndDate(endDate)) {
+                if (dbUtils.deleteWorkerByEndDate(endDate, currentUserId)) {
                     workerIterator.remove();
                 }
 
@@ -135,7 +135,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
      * удаляет все элементы коллекции, значение поля startDate которых равно заданному
      */
     @Override
-    public void removeAnyByStartDate(LocalDate startDate) {
+    public void removeAnyByStartDate(LocalDate startDate, long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         Iterator<Map.Entry<Long, Worker>> workerIterator = workers.entrySet().iterator();
         while (workerIterator.hasNext()) {
@@ -143,7 +143,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Worker w = entry.getValue();
             LocalDate curStartDate = w.getStartDate();
             if (curStartDate.isEqual(startDate)) {
-                if (dbUtils.deleteWorkerByStartDate(startDate)) {
+                if (dbUtils.deleteWorkerByStartDate(startDate, currentUserId)) {
                     workerIterator.remove();
                 }
             }

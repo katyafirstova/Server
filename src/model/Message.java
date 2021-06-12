@@ -21,6 +21,10 @@ public class Message implements Serializable {
     ConcurrentHashMap<Long, Worker> workers;
     LocalDateTime initData;
 
+    public Message(CommandCollection collection) {
+        this.collection = collection;
+    }
+
     public Message(CommandCollection collection, ConcurrentHashMap<Long, Worker> workers) {
         this.collection = collection;
         this.workers = workers;
@@ -30,16 +34,19 @@ public class Message implements Serializable {
         this.collection = collection;
         this.initData = initData;
         this.workers = workers;
+
     }
 
-    public Message(CommandCollection collection, Long key) {
+    public Message(CommandCollection collection, Long key, User user) {
         this.collection = collection;
         this.key = key;
+        this.worker = new Worker(user);
     }
 
 
-    public Message(CommandCollection collection) {
+    public Message(CommandCollection collection, User user) {
         this.collection = collection;
+        this.worker = new Worker(user);
     }
 
     public Message(CommandCollection collection, Worker worker) {
@@ -47,19 +54,22 @@ public class Message implements Serializable {
         this.worker = worker;
     }
 
-    public Message(CommandCollection collection, int salary) {
+    public Message(CommandCollection collection, int salary, User user) {
         this.collection = collection;
         this.salary = salary;
+        this.worker = new Worker(user);
     }
 
-    public Message(CommandCollection collection, Date date) {
+    public Message(CommandCollection collection, Date date, User user) {
         this.collection = collection;
         this.date = date;
+        this.worker = new Worker(user);
     }
 
-    public Message(CommandCollection collection, LocalDate startDate) {
+    public Message(CommandCollection collection, LocalDate startDate, User user) {
         this.collection = collection;
         this.startDate = startDate;
+        this.worker = new Worker(user);
     }
 
 

@@ -225,15 +225,16 @@ public class DBWorkerUtils extends DBConnection {
         return id;
     }
 
-    public boolean deleteWorkerById(long id) {
+    public boolean deleteWorkerById(long id, long currentUserId) {
         LOG.debug(String.format("deleteWorkerById"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         Worker worker = new Worker();
         try {
-            String sql = "delete from worker where worker_id = ?";
+            String sql = "delete from worker where worker_id = ? and user_id = ?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setLong(1, id);
+            preparedStatement.setLong(2, currentUserId);
             int result = preparedStatement.executeUpdate();
             LOG.debug(String.format("Deleted row, id = %d, res = %d ", id, result));
         } catch (SQLException e) {
@@ -256,13 +257,14 @@ public class DBWorkerUtils extends DBConnection {
     }
 
 
-    public boolean deleteWorker() {
+    public boolean deleteWorker(long currentUserId) {
         LOG.debug(String.format("deleteWorker"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
-            String sql = "truncate worker";
+            String sql = "delete from worker where user_id = ?";
             preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, currentUserId);
             preparedStatement.execute();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
@@ -283,14 +285,15 @@ public class DBWorkerUtils extends DBConnection {
         return true;
     }
 
-    public boolean deleteWorkerByGreaterSalary(int salary) {
+    public boolean deleteWorkerByGreaterSalary(int salary, long currentUserId) {
         LOG.debug(String.format("deleteWorkerByGreaterSalary"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
-            String sql = "delete from worker where salary >= ?";
+            String sql = "delete from worker where salary >= ? and user_id = ?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, salary);
+            preparedStatement.setLong(2, currentUserId);
             preparedStatement.execute();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
@@ -311,14 +314,15 @@ public class DBWorkerUtils extends DBConnection {
         return true;
     }
 
-    public boolean deleteWorkerByLowerSalary(int salary) {
+    public boolean deleteWorkerByLowerSalary(int salary, long currentUserId) {
         LOG.debug(String.format("deleteWorkerByLowerSalary"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
-            String sql = "delete from worker where salary <= ?";
+            String sql = "delete from worker where salary <= ? and user_id = ?";
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setInt(1, salary);
+            preparedStatement.setLong(2, currentUserId);
             preparedStatement.execute();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
@@ -339,15 +343,16 @@ public class DBWorkerUtils extends DBConnection {
         return true;
     }
 
-    public boolean deleteWorkerByEndDate(Date endDate) {
+    public boolean deleteWorkerByEndDate(Date endDate, long currentUserId) {
         LOG.debug(String.format("deleteWorkerByEndDate"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
-            String sql = "delete from worker where enddate = ?";
+            String sql = "delete from worker where enddate = ? and user_id = ?";
             preparedStatement = connection.prepareStatement(sql);
             java.sql.Date sqlEndDate = new java.sql.Date(endDate.getTime());
             preparedStatement.setDate(1, sqlEndDate);
+            preparedStatement.setLong(2, currentUserId);
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
@@ -370,17 +375,18 @@ public class DBWorkerUtils extends DBConnection {
 
     }
 
-    public boolean deleteWorkerByStartDate(LocalDate startDate) {
+    public boolean deleteWorkerByStartDate(LocalDate startDate, long currentUserId) {
         LOG.debug(String.format("deleteWorkerByStartDate"));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
-            String sql = "delete from worker where startdate = ?";
+            String sql = "delete from worker where startdate = ? and user_id = ?";
             preparedStatement = connection.prepareStatement(sql);
             Instant instant = Instant.from(startDate.atStartOfDay(ZoneId.of("GMT")));
             Date newStartDate = Date.from(instant);
             java.sql.Date sqlStartDate = new java.sql.Date(newStartDate.getTime());
             preparedStatement.setDate(1, sqlStartDate);
+            preparedStatement.setLong(2, currentUserId);
             preparedStatement.execute();
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
@@ -407,6 +413,7 @@ public class DBWorkerUtils extends DBConnection {
 
         try {
             String sql = "select \n" +
+                    "    worker_id as worker_id," +
                     "    worker.name as worker_name, worker.creationdate, worker.salary, worker.startdate," +
                     " worker.enddate,\n" +
                     "    coordinates.x, coordinates.y, \n" +
@@ -437,6 +444,7 @@ public class DBWorkerUtils extends DBConnection {
                         Color.fromStr(rs.getString("color_name")),
                         new User(rs.getString("username"), rs.getString("userpassword"))
                 );
+                worker.setId(rs.getLong("worker_id"));
 
                 workers.put(worker.getId(), worker);
             }
