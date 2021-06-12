@@ -6,8 +6,10 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 
 import model.*;
+import model.WorkerFabric;
 import org.slf4j.*;
 
 /**
@@ -396,6 +398,63 @@ public class DBWorkerUtils extends DBConnection {
 
         }
         return true;
+    }
+
+    public ConcurrentHashMap<Long, Worker> getWorkers() {
+        Connection connection = getDBConnection();
+        PreparedStatement preparedStatement = null;
+        ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<Long, Worker>();
+
+        try {
+            String sql = "select \n" +
+                    "    worker.name as worker_name, worker.creationdate, worker.salary, worker.startdate," +
+                    " worker.enddate,\n" +
+                    "    coordinates.x, coordinates.y, \n" +
+                    "    status.\"name\" as status_name,\n" +
+                    "    color.\"name\" as color_name,\n" +
+                    "    person.\"height\", person.weight,\n" +
+                    "    user_worker.username, user_worker.userpassword\n" +
+                    "from worker\n" +
+                    "    inner join coordinates on worker.coordinates_id = coordinates.\"id\"\n" +
+                    "    inner join status on worker.status_id = status.\"id\"\n" +
+                    "    inner join person on worker.person_id = person.\"id\"\n" +
+                    "    inner join color on person.color_id = color.\"id\"\n" +
+                    "    inner join user_worker on worker.user_id = user_worker.\"id\";";
+            preparedStatement = connection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
+            while(rs.next()) {
+
+                Worker worker = WorkerFabric.create(
+                        rs.getString("worker_name"),
+                        rs.getFloat("x"),
+                        rs.getInt("y"),
+                        rs.getInt("salary"),
+                        rs.getDate("startdate").toLocalDate(),
+                        rs.getDate("enddate"),
+                        Status.fromStr(rs.getString("status_name")),
+                        rs.getFloat("height"),
+                        rs.getInt("weight"),
+                        Color.fromStr(rs.getString("color_name")),
+                        new User(rs.getString("username"), rs.getString("userpassword"))
+                );
+
+                workers.put(worker.getId(), worker);
+            }
+        } catch (SQLException e) {
+            LOG.debug(e.getMessage());
+        } finally {
+            try {
+                if (connection != null) {
+                    connection.close();
+                }
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException exception) {
+                LOG.debug(exception.getMessage());
+            }
+        }
+        return workers;
     }
 }
 

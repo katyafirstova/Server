@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 public class Message implements Serializable {
@@ -17,15 +18,15 @@ public class Message implements Serializable {
     Date date;
     LocalDate startDate;
     Long key;
-    HashMap<Long, Worker> workers;
+    ConcurrentHashMap<Long, Worker> workers;
     LocalDateTime initData;
 
-    public Message(CommandCollection collection, HashMap<Long, Worker> workers) {
+    public Message(CommandCollection collection, ConcurrentHashMap<Long, Worker> workers) {
         this.collection = collection;
         this.workers = workers;
     }
 
-    public Message(CommandCollection collection, LocalDateTime initData, HashMap<Long, Worker> workers) {
+    public Message(CommandCollection collection, LocalDateTime initData, ConcurrentHashMap<Long, Worker> workers) {
         this.collection = collection;
         this.initData = initData;
         this.workers = workers;
@@ -61,6 +62,7 @@ public class Message implements Serializable {
         this.startDate = startDate;
     }
 
+
     public CommandCollection getCollection() {
         return collection;
     }
@@ -86,7 +88,7 @@ public class Message implements Serializable {
         return key;
     }
 
-    public HashMap<Long, Worker> getWorkers() {
+    public ConcurrentHashMap<Long, Worker> getWorkers() {
         return workers;
     }
 

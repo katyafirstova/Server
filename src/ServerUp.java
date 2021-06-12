@@ -27,6 +27,11 @@ public class ServerUp {
 
     public ServerUp() {
         this.serverAddr = LOCALHOST;
+        initCollection();
+    }
+
+    private void initCollection() {
+        this.collection.load();
     }
 
 

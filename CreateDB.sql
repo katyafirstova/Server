@@ -167,6 +167,20 @@ delete from worker where worker_id = 89991;
 
 select * from worker;
 
+select
+    worker.name as worker_name, worker.creationdate, worker.salary, worker.startdate, worker.enddate,
+    coordinates.x, coordinates.y,
+    status."name" as status_name,
+    color."name" as color_name,
+    person."height", person.weight,
+    user_worker.username, user_worker.userpassword
+from worker
+    inner join coordinates on worker.coordinates_id = coordinates."id"
+    inner join status on worker.status_id = status."id"
+    inner join person on worker.person_id = person."id"
+    inner join color on person.color_id = color."id"
+    inner join user_worker on worker.user_id = user_worker."id";
+
 
 
 

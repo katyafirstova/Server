@@ -23,7 +23,7 @@ import org.slf4j.*;
  * {code WorkerCollection} Методы для работы с коллекцией
  */
 
-public class WorkerCollection implements InterfaceWorkerCollection {
+public class WorkerCollection implements InterfaceWorkerCollection, Serializable {
 
     static final Logger LOG = LoggerFactory.getLogger(WorkerCollection.class);
     private  ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<Long, Worker>();
@@ -151,12 +151,17 @@ public class WorkerCollection implements InterfaceWorkerCollection {
 
     }
 
-    public HashMap<Long, Worker> getWorkers() {
+    public ConcurrentHashMap<Long, Worker> getWorkers() {
         return workers;
     }
 
     public LocalDateTime getInitData() {
         return initData;
+    }
+
+    public void load() {
+        DBWorkerUtils dbWorkerUtils = new DBWorkerUtils();
+        this.workers = dbWorkerUtils.getWorkers();
     }
 }
 
