@@ -86,7 +86,7 @@ public class DBWorkerUtils extends DBConnection {
     }
 
 
-    public long insertWorker(long worker_id, String name, int coordinates_id, int salary,
+    public boolean insertWorker(long worker_id, String name, int coordinates_id, int salary,
                                 LocalDate startDate, Date endDate, Status status, int person_id, long user_id) {
         LOG.debug(String.format("insertWorker"));
         Connection connection = getDBConnection();
@@ -107,16 +107,13 @@ public class DBWorkerUtils extends DBConnection {
             preparedStatement.setInt(8, person_id);
             preparedStatement.setLong(9, user_id);
             preparedStatement.executeUpdate();
-            ResultSet generatedKeys = preparedStatement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                primkey = generatedKeys.getInt(1);
-            }
+
         } catch (SQLException e) {
             LOG.debug(e.getMessage());
-            return -1;
+            return false;
         } catch (Exception e) {
             LOG.debug(e.getMessage());
-            return -1;
+            return false;
         } finally {
             try {
                 if (connection != null) {
@@ -127,12 +124,13 @@ public class DBWorkerUtils extends DBConnection {
                 }
             } catch (SQLException exception) {
                 LOG.debug(exception.getMessage());
+                return false;
             }
         }
-        return primkey;
+        return true;
     }
 
-    public long insertWorker(Worker worker) {
+    public boolean insertWorker(Worker worker) {
         Coordinates coordinates = worker.getCoordinates();
         Person person = worker.getPerson();
         int coordinates_id = insertCoordinates(coordinates.getX(), coordinates.getY());
@@ -447,6 +445,7 @@ public class DBWorkerUtils extends DBConnection {
                 worker.setId(rs.getLong("worker_id"));
 
                 workers.put(worker.getId(), worker);
+                //LOG.debug(String.format("workers.put: %s", worker));
             }
         } catch (SQLException e) {
             LOG.debug(e.getMessage());

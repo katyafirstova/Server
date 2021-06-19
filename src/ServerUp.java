@@ -3,11 +3,16 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 
 import core.WorkerCollection;
 import model.CommandCollection;
 import model.Message;
 import model.User;
+import model.Worker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,8 +53,25 @@ public class ServerUp {
                 SocketAddress client = server.receive(buffer);
                 if (client != null) {
                     buffer.flip();
-                    LOG.info("Receive buffer: " + buffer.toString());
-                    processRequest(buffer, (InetSocketAddress) client);
+                    Runnable processor = new Runnable() {
+
+                        private ByteBuffer buf;
+                        private InetSocketAddress cln;
+
+                        @Override
+                        public void run() {
+                            LOG.info("Receive buffer: " + buf.toString());
+                            processRequest(this.buf, this.cln);
+                        }
+
+                        public Runnable init(ByteBuffer buf, InetSocketAddress cln) {
+                            this.buf = buf;
+                            this.cln = cln;
+                            return this;
+                        }
+                    }.init(buffer, (InetSocketAddress) client);
+                    Thread thread = new Thread(processor);
+                    thread.start();
                 }
             }
         } catch (IOException e) {
@@ -59,7 +81,7 @@ public class ServerUp {
             LOG.info(e.getLocalizedMessage());
         }
     }
-    private void processRequest(ByteBuffer buffer, InetSocketAddress client) {
+    private synchronized void processRequest(ByteBuffer buffer, InetSocketAddress client) {
         try {
             Message message = deserialize(buffer);
             if (message != null) {

@@ -40,8 +40,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
     @Override
     public void insert(Worker worker) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
-        long id = dbUtils.insertWorker(worker);
-        if (id > 0) {
+        if (dbUtils.insertWorker(worker)) {
             workers.put(worker.getId(), worker);
         }
     }
@@ -53,7 +52,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
     public void removeKey(long id, long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         if(dbUtils.deleteWorkerById(id, currentUserId)) {
-            workers.remove(id);
+            this.load();
         }
     }
 
@@ -65,7 +64,7 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
     public void clear(long currentUserId) {
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         if (dbUtils.deleteWorker(currentUserId)) {
-            workers.clear();
+            this.load();
         }
     }
 
@@ -81,11 +80,10 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Worker w = entry.getValue();
             int curSalary = w.getSalary();
             if (curSalary > salary) {
-                if (dbUtils.deleteWorkerByGreaterSalary(salary, currentUserId)) {
-                    workerIterator.remove();
-                }
+                dbUtils.deleteWorkerByGreaterSalary(salary, currentUserId);
             }
         }
+        this.load();
     }
 
 
@@ -101,11 +99,10 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Worker w = entry.getValue();
             int curSalary = w.getSalary();
             if (curSalary < salary) {
-                if (dbUtils.deleteWorkerByLowerSalary(salary, currentUserId)) {
-                    workerIterator.remove();
-                }
+                dbUtils.deleteWorkerByLowerSalary(salary, currentUserId);
             }
         }
+        this.load();
     }
 
     /**
@@ -123,12 +120,10 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Date curEndDate = w.getEndDate();
             final long difference = curEndDate.getTime() - endDate.getTime();
             if (difference > -1000 && difference < 1000) {
-                if (dbUtils.deleteWorkerByEndDate(endDate, currentUserId)) {
-                    workerIterator.remove();
-                }
-
+                dbUtils.deleteWorkerByEndDate(endDate, currentUserId);
             }
         }
+        this.load();
     }
 
     /**
@@ -143,11 +138,10 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
             Worker w = entry.getValue();
             LocalDate curStartDate = w.getStartDate();
             if (curStartDate.isEqual(startDate)) {
-                if (dbUtils.deleteWorkerByStartDate(startDate, currentUserId)) {
-                    workerIterator.remove();
-                }
+                dbUtils.deleteWorkerByStartDate(startDate, currentUserId);
             }
         }
+        this.load();
 
     }
 
@@ -159,8 +153,9 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
         return initData;
     }
 
-    public void load() {
+    public synchronized void load() {
         DBWorkerUtils dbWorkerUtils = new DBWorkerUtils();
+        this.workers.clear();
         this.workers = dbWorkerUtils.getWorkers();
     }
 }
