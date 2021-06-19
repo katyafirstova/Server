@@ -26,7 +26,7 @@ import org.slf4j.*;
 public class WorkerCollection implements InterfaceWorkerCollection, Serializable {
 
     static final Logger LOG = LoggerFactory.getLogger(WorkerCollection.class);
-    private  ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<Long, Worker>();
+    private  ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<>();
     private LocalDateTime initData;
 
 
@@ -42,6 +42,14 @@ public class WorkerCollection implements InterfaceWorkerCollection, Serializable
         DBWorkerUtils dbUtils = new DBWorkerUtils();
         if (dbUtils.insertWorker(worker)) {
             workers.put(worker.getId(), worker);
+        }
+    }
+
+    @Override
+    public void update(Worker worker) {
+        DBWorkerUtils dbUtils = new DBWorkerUtils();
+        if (dbUtils.updateWorker(worker)) {
+            this.load();
         }
     }
 

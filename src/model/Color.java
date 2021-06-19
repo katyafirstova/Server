@@ -21,7 +21,7 @@ public enum Color implements Serializable {
 
     public static Color fromStr(String cmd) {
         for (Color s : Color.values()) {
-            if (cmd != null && cmd.toLowerCase(Locale.ROOT).equals(s.name())) {
+            if (cmd != null && cmd.toLowerCase().equals(s.name())) {
                 return s;
             }
         }

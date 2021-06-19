@@ -76,7 +76,6 @@ public class ServerUp {
             }
         } catch (IOException e) {
             LOG.info(e.getLocalizedMessage());
-
         } catch (Exception e) {
             LOG.info(e.getLocalizedMessage());
         }
@@ -86,7 +85,7 @@ public class ServerUp {
             Message message = deserialize(buffer);
             if (message != null) {
                 CommandCollection cmd = message.getCollection();
-                Long currentUserId = -1l;
+                Long currentUserId = -1L;
                 if(message.getWorker() != null) {
                     currentUserId =  message.getWorker().getUserId();
                 }
@@ -95,6 +94,10 @@ public class ServerUp {
                     switch (cmd) {
                         case INSERT:
                             collection.insert(message.getWorker());
+                            break;
+
+                        case UPDATE_ID:
+                            collection.update(message.getWorker());
                             break;
 
                         case SHOW:
@@ -171,7 +174,7 @@ public class ServerUp {
     public Message deserialize(ByteBuffer buffer) {
         Message message = null;
         try (ByteArrayInputStream bis = new ByteArrayInputStream(buffer.array());
-             ObjectInputStream in = new ObjectInputStream(bis);) {
+             ObjectInputStream in = new ObjectInputStream(bis)) {
             message = (Message) in.readObject();
         } catch (IOException | ClassNotFoundException e) {
             LOG.debug(e.getMessage());
@@ -183,7 +186,7 @@ public class ServerUp {
     public ByteBuffer serialize(Message message) {
         ByteBuffer buffer = null;
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             ObjectOutputStream oos = new ObjectOutputStream(baos);) {
+             ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(message);
             buffer = ByteBuffer.wrap(baos.toByteArray());
         } catch (IOException e) {

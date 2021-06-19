@@ -124,7 +124,6 @@ public class DBWorkerUtils extends DBConnection {
                 }
             } catch (SQLException exception) {
                 LOG.debug(exception.getMessage());
-                return false;
             }
         }
         return true;
@@ -139,6 +138,17 @@ public class DBWorkerUtils extends DBConnection {
                 worker.getEndDate(), worker.getStatus(), person_id, worker.getUserId());
     }
 
+    public boolean updateWorker(Worker worker) {
+        Coordinates coordinates = worker.getCoordinates();
+        Person person = worker.getPerson();
+        int coordinates_id = insertCoordinates(coordinates.getX(), coordinates.getY());
+        int person_id = insertPerson(person.getHeight(), person.getWeight(), person.getHairColor());
+
+        deleteWorkerById(worker.getId(), worker.getUserId());
+        return insertWorker(worker.getId(), worker.getName(), coordinates_id, worker.getSalary(), worker.getStartDate(),
+                worker.getEndDate(), worker.getStatus(), person_id, worker.getUserId());
+    }
+
     public Integer getColorId(Color color) {
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
@@ -146,7 +156,7 @@ public class DBWorkerUtils extends DBConnection {
         try {
             String sql = "select id from color where name = ?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, color.getName().toLowerCase(Locale.ROOT));
+            preparedStatement.setString(1, color.getName().toLowerCase());
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
             id = rs.getInt("id");
@@ -174,7 +184,7 @@ public class DBWorkerUtils extends DBConnection {
         try {
             String sql = "select id from status where name = ?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, status.getName().toLowerCase(Locale.ROOT));
+            preparedStatement.setString(1, status.getName().toLowerCase());
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
             id = rs.getInt("id");
@@ -202,7 +212,7 @@ public class DBWorkerUtils extends DBConnection {
         try {
             String sql = "select id from worker where name = ?";
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setString(1, worker.getName().toLowerCase(Locale.ROOT));
+            preparedStatement.setString(1, worker.getName().toLowerCase());
             ResultSet rs = preparedStatement.executeQuery();
             rs.next();
             id = rs.getInt("id");
@@ -224,7 +234,7 @@ public class DBWorkerUtils extends DBConnection {
     }
 
     public boolean deleteWorkerById(long id, long currentUserId) {
-        LOG.debug(String.format("deleteWorkerById"));
+        LOG.debug(String.format("deleteWorkerById %d", id));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         Worker worker = new Worker();
@@ -256,7 +266,7 @@ public class DBWorkerUtils extends DBConnection {
 
 
     public boolean deleteWorker(long currentUserId) {
-        LOG.debug(String.format("deleteWorker"));
+        LOG.debug(String.format("deleteWorker %d", currentUserId));
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
         try {
@@ -407,7 +417,7 @@ public class DBWorkerUtils extends DBConnection {
     public ConcurrentHashMap<Long, Worker> getWorkers() {
         Connection connection = getDBConnection();
         PreparedStatement preparedStatement = null;
-        ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<Long, Worker>();
+        ConcurrentHashMap<Long, Worker> workers = new ConcurrentHashMap<>();
 
         try {
             String sql = "select \n" +
