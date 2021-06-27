@@ -153,18 +153,6 @@ select * from worker;
 
 select current_date;
 
-insert into worker(name, creationdate, salary, startdate, enddate, coordinates_id, status_id, person_id)
-    values ('frfrfrefr',
-    current_date,
-    5434,
-    '2002-03-04',
-    '2002-03-04 00:02:03',
-    1,
-    1,
-    1);
-
-delete from worker where worker_id = 89991;
-
 select * from worker;
 
 select

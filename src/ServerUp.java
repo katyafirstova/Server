@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import core.WorkerCollection;
 import model.CommandCollection;
@@ -23,6 +26,14 @@ public class ServerUp {
     static final int PORT_SERVER = 9023;
     static final int PORT_CLIENT = 43245;
     private final String serverAddr;
+    ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+            1,
+            Integer.MAX_VALUE,
+            60L,
+            TimeUnit.SECONDS,
+            new SynchronousQueue<>()
+    );
+
 
 
     WorkerCollection collection = new WorkerCollection();
@@ -41,6 +52,26 @@ public class ServerUp {
     }
 
 
+    class ProcessTask implements Runnable {
+
+        private ByteBuffer buf;
+        private InetSocketAddress cln;
+
+        @Override
+        public void run() {
+            LOG.info("Receive buffer: " + buf.toString());
+            processRequest(this.buf, this.cln);
+        }
+
+        public Runnable init(ByteBuffer buf, InetSocketAddress cln) {
+            this.buf = buf;
+            this.cln = cln;
+            return this;
+        }
+
+    }
+
+
     public void run() {
         try {
             ByteBuffer buffer = ByteBuffer.allocate(1024 * 20);
@@ -53,25 +84,8 @@ public class ServerUp {
                 SocketAddress client = server.receive(buffer);
                 if (client != null) {
                     buffer.flip();
-                    Runnable processor = new Runnable() {
-
-                        private ByteBuffer buf;
-                        private InetSocketAddress cln;
-
-                        @Override
-                        public void run() {
-                            LOG.info("Receive buffer: " + buf.toString());
-                            processRequest(this.buf, this.cln);
-                        }
-
-                        public Runnable init(ByteBuffer buf, InetSocketAddress cln) {
-                            this.buf = buf;
-                            this.cln = cln;
-                            return this;
-                        }
-                    }.init(buffer, (InetSocketAddress) client);
-                    Thread thread = new Thread(processor);
-                    thread.start();
+                    ProcessTask task = new ProcessTask();
+                    threadPoolExecutor.submit(task.init(buffer, (InetSocketAddress) client));
                 }
             }
         } catch (IOException e) {
@@ -206,4 +220,3 @@ public class ServerUp {
         return in;
     }
 }
-
